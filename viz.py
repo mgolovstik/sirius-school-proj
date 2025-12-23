@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from tqdm.notebook import tqdm
 import matplotlib.pyplot as plt
 
 sns.set_style('white')

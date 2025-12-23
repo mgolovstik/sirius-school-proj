@@ -2,3 +2,8 @@
 .ipynb_checkpoints/
 __pycache__/
 data/data_main/
+/data/geocoding_ya
+/analytics/catboost_info
+/data/geocoding_ya2
+data/yandex_coords_4h.csv
+data/yandex_coords_8h.csv
