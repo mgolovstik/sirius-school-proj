@@ -114,6 +114,7 @@ def get_data_radius(lat, lon, radius):
         f'traffic4_{radius}m': data['traffic4'],
     }
 
-    pd_dict.update(data["price"]) # Не зависит от радиуса
-    pd_dict.update(orgs_dict)
+    # pd_dict.update(data["price"]) # Не зависит от радиуса
+    # pd_dict.update(orgs_dict)
+    pd_dict.update({'district_price': data["price"]['district_price']})
     return pd_dict
