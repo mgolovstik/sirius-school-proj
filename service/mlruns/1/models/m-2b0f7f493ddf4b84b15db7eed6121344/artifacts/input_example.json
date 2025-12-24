@@ -1,0 +1,1 @@
+{"columns": ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"], "data": [[3, 1, 25.0, 0, 0, 7.05, "S"]]}
