@@ -1,0 +1,24 @@
+{
+  "name": "RentPredictionModule",
+  "version": "1.0.0",
+  "description": "Модуль прогноза стоимости аренды коммерческой недвижимости",
+  "inputs": [
+    "lat",
+    "lon",
+    "square",
+    "property_type",
+    "floor",
+    "year_built",
+    "radius"
+  ],
+  "outputs": [
+    "predicted_price",
+    "features_used",
+    "processing_time"
+  ],
+  "dependencies": [
+    "asyncio",
+    "pandas",
+    "numpy"
+  ]
+}
