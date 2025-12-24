@@ -70,36 +70,47 @@ def get_data_geocoder_address(address):
         'near_subway_distance': data['near_subway_distance'],
     }
 
+def get_and_check_i_dont_want_to_make_names(d: dict, id):
+    if not (type(d) is dict):
+        return np.nan
+    if id not in d:
+        return np.nan
+    return d[id]
+
 @lru_cache(maxsize=2048)
 def get_data_radius(lat, lon, radius):
     data = api_call_analytic(lat, lon, radius)
 
     # Организации: количество вокруг
-    orgs = [d for d in data["orgs"].values()]
-    orgs_dict = {f"{d['group_name']}_count_{radius}m": d['count'] for d in orgs}
+    orgs = {(d['group_name']+f"_{radius}"): d['count'] 
+            for d in get_and_check_i_dont_want_to_make_names(data, "orgs").values()}
 
     # Зона: информация о недвижимости вокруг
-    zone_info = {d['name']: d['value'] for d in data["zone"]}
-    if 'Строений' not in zone_info:
-        n_buildings = None
+    if type(get_and_check_i_dont_want_to_make_names(data, "zone")) is list:
+        zone_info = {get_and_check_i_dont_want_to_make_names(d, "name"): get_and_check_i_dont_want_to_make_names(d, "value") 
+                    for d in get_and_check_i_dont_want_to_make_names(data, "zone")}
     else:
-        n_buildings = zone_info['Строений']
-    if 'Жилых домов' not in zone_info:
-        n_living_buildings = None
-    else:
-        n_living_buildings = zone_info['Жилых домов']
-    if 'Квартир' not in zone_info:
-        n_flats = None
-    else:
-        n_flats = zone_info['Квартир']
+        zone_info = np.nan
+    n_buildings = get_and_check_i_dont_want_to_make_names(zone_info, 'Строений')
+    n_living_buildings = get_and_check_i_dont_want_to_make_names(zone_info, 'Жилых домов')
+    n_flats = get_and_check_i_dont_want_to_make_names(zone_info, 'Квартир')
 
     # Бизнес-центры -- расстояния
-    bc_distances = [d['distance'] for d in data["bcenters"]]
-    min_bc_distance = np.min(bc_distances)
-    mean_bc_distance = np.mean(bc_distances)
+    if type(get_and_check_i_dont_want_to_make_names(data, "bcenters")) is list:
+        bc_distances = [get_and_check_i_dont_want_to_make_names(d, 'distance')
+                        for d in get_and_check_i_dont_want_to_make_names(data, "bcenters")]
+    else:
+        bc_distances = []
+    bc_distances = np.array(bc_distances)
+    if len(bc_distances) != 0:
+        min_bc_distance = np.min(bc_distances)
+        mean_bc_distance = np.mean(bc_distances)
+    else:
+        min_bc_distance = None
+        mean_bc_distance = None
 
     pd_dict = {
-        'district_name': data['district_name'],
+        'district_name': get_and_check_i_dont_want_to_make_names(data, 'district_name'),
         
         f'n_buildings_{radius}m': n_buildings,
         f'n_living_buildings_{radius}m': n_living_buildings,
@@ -108,13 +119,15 @@ def get_data_radius(lat, lon, radius):
         f'min_bc_distance_{radius}m': min_bc_distance,
         f'mean_bc_distance_{radius}m': mean_bc_distance,
 
-        f'traffic1_{radius}m': data['traffic1'],
-        f'traffic2_{radius}m': data['traffic2'],
-        f'traffic3_{radius}m': data['traffic3'],
-        f'traffic4_{radius}m': data['traffic4'],
+        f'traffic1_{radius}m': get_and_check_i_dont_want_to_make_names(data, 'traffic1'),
+        f'traffic2_{radius}m': get_and_check_i_dont_want_to_make_names(data, 'traffic2'),
+        f'traffic3_{radius}m': get_and_check_i_dont_want_to_make_names(data, 'traffic3'),
+        f'traffic4_{radius}m': get_and_check_i_dont_want_to_make_names(data, 'traffic4'),
     }
 
     # pd_dict.update(data["price"]) # Не зависит от радиуса
-    # pd_dict.update(orgs_dict)
-    pd_dict.update({'district_price': data["price"]['district_price']})
+    pd_dict.update(orgs)
+    pd_dict.update({'district_price': get_and_check_i_dont_want_to_make_names(
+        get_and_check_i_dont_want_to_make_names(data, 'price'), 'district_price')
+    })
     return pd_dict
