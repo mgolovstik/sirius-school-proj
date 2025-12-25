@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, ConfigDict, field_validator
 class AdvertInput(BaseModel):
     lat: float = Field(..., example=54.3245, alias="lat")
     lon: float = Field(..., example=37.3562, alias="lng")
-    square: float | int = Field(..., example=200, alias="Общая площадь")
+    square: float | float = Field(..., example=200, alias="Общая площадь")
     metro_dist: float | int = Field(..., example=0.25, alias="Расстояние до метро, км")
     floor: int | None = Field(..., example=2, alias="Этаж")
     author_type: Optional[
