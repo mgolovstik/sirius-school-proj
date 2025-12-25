@@ -27,15 +27,15 @@ def haversine_2D_mat(data1, data2):
     return vec_dist * 1000
 
 
-def get_dict(lat, lon, R, rub):
+def get_dict(lat, lon, radius, rubrics):
     point_df = pd.DataFrame({"lat": [lat], "lon": [lon]})
     ls = haversine_2D_mat(point_df, DF)[0]
-    r = df.loc[ls <= R, "rubrics"]
+    r = DF.loc[ls <= radius, "rubrics"]
     rub_split = r.str.split(";").dropna()
     rub_split = rub_split.apply(lambda x: set(x))
     lst = {}
     for sub in rub_split:
-        for a in rub:
+        for a in rubrics:
             fl = False
             for x in a:
                 if x in sub:
@@ -43,3 +43,4 @@ def get_dict(lat, lon, R, rub):
             if fl:
                 lst["_".join(a)] = lst.get("_".join(a), 0) + 1
     return lst
+

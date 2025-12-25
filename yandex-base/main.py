@@ -10,7 +10,7 @@ app = FastAPI()
 async def get_yandex(input_json: YandexBaseInput) -> YandexBaseOutput | None:
     raw_json = input_json.model_dump()
     try:
-        data = get_dict(raw_json)
+        data = get_dict(**raw_json)
         result_dict = {
             'data': data,
         }
