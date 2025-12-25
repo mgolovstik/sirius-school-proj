@@ -2,4 +2,5 @@
 .ipynb_checkpoints/
 __pycache__/
 data/data_main/
-/analytics/catboost_info
+catboost_info/
+mlruns/
