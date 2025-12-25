@@ -4,7 +4,8 @@ scikit-learn==1.7.2
 catboost
 fastapi
 uvicorn
-mlflow
+shap
+mlflow==3.8.0
 pydantic
 pydantic-settings
 python-dotenv
