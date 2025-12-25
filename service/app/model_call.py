@@ -3,6 +3,8 @@ import asyncio
 import pandas as pd
 from dotenv import load_dotenv
 from mosmapapi import get_mosmap_data
+from yb.main import get_yandex
+from yb.schemas import YandexBaseInput, YandexBaseOutput
 
 assert load_dotenv()
 
@@ -15,6 +17,8 @@ CHOSEN_COLUMNS = [
 	...
 ]
 
+async def get_yandex_data(lat, lon, radius, rubrics):
+	return await get_yandex(YandexBaseInput(lat=lat, lon=lon, radius=radius, rubrics=rubrics))
 
 def to_pandas(raw_json):
 	df_point = pd.DataFrame(data=raw_json, index=[0])
@@ -37,7 +41,7 @@ def predict_ad(raw_json):
 
 	df_point = pd.concat([df_point, mosmap_data, yandex_data])
 
-	model = mlflow.sklearn.load_model("models:/moscow-rent/Production")
-	y_pred = model.predict(df_point[CHOSEN_COLUMNS])[0]
+	mlflow_model = mlflow.sklearn.load_model("models:/" + misha_model_name + "/2")
+	y_pred = mlflow_model.predict(df_point[CHOSEN_COLUMNS])[0]
 
-	...
+	return y_pred
