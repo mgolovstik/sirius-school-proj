@@ -3,3 +3,5 @@
 __pycache__/
 data/data_main/
 /analytics/catboost_info
+/data/geocoding_ya
+/data/geocoding_err
