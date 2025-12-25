@@ -2,14 +2,11 @@ import mlflow
 import asyncio
 import pandas as pd
 from dotenv import load_dotenv
-from mosmapapi import get_mosmap_data
+from mosmap_api import get_mosmap_data
+from yandex_api import get_yandex_data
 
 assert load_dotenv()
 
-
-YANDEX_CATEGORIES = [
-	...
-]
 
 CHOSEN_COLUMNS = [
 	...
@@ -40,4 +37,4 @@ def predict_ad(raw_json):
 	model = mlflow.sklearn.load_model("models:/moscow-rent/Production")
 	y_pred = model.predict(df_point[CHOSEN_COLUMNS])[0]
 
-	...
+	... # TODO
