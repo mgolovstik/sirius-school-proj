@@ -24,11 +24,12 @@ def predict_ad(raw_json):
 
 	mosmap_data_1, mosmap_data_2, yandex_data_1, yandex_data_2 = await asyncio.gather(
 		get_mosmap_data(lat, lon, 300),
-		get_mosmap_data(lat, lon, 600).drop(['district_price', 'district_name'], axis=1),
+		get_mosmap_data(lat, lon, 600),
 		get_yandex_data(lat, lon, 300, YANDEX_CATEGORIES),
 		get_yandex_data(lat, lon, 600, YANDEX_CATEGORIES),
 	)
 
+	mosmap_data_2 = mosmap_data_2.drop(['district_price', 'district_name'], axis=1)
 	mosmap_data = pd.concat([mosmap_data_1, mosmap_data_2], axis=1)
 	yandex_data = pd.concat([yandex_data_1, yandex_data_2], axis=1)
 

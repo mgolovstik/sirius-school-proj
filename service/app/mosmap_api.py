@@ -8,9 +8,9 @@ from functools import lru_cache
 
 assert load_dotenv()
 
-URL = os.getenv("MOSMAP_GEOCODER_URL")
-URL_GEOCODER = os.getenv("MOSMAP_URL")
-API_KEY = os.getenv("MOSMAP_URL_GEOCODER")
+URL = os.getenv("MOSMAP_URL")
+URL_GEOCODER = os.getenv("MOSMAP_URL_GEOCODER")
+API_KEY = os.getenv("MOSMAP_API_KEY")
 
 '''
 Модуль получения геоданных через mosmap
