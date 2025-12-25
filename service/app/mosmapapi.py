@@ -1,22 +1,42 @@
-import requests
-import pandas as pd
+import os
 import re
+import requests
 import numpy as np
-import dotenv
+import pandas as pd
+from dotenv import load_dotenv
 from functools import lru_cache
 
-URL = "https://mosmap.ru/api/api_analitic.php"
-URL_GEO = "https://mosmap.ru/api/api_geocoder.php"
-API_KEY = "b089de13-5470-4717-9d5f-425f2b4b41a8"
+assert load_dotenv()
+
+URL = os.getenv("MOSMAP_GEOCODER_URL")
+URL_GEOCODER = os.getenv("MOSMAP_URL")
+API_KEY = os.getenv("MOSMAP_URL_GEOCODER")
+
+'''
+Модуль получения геоданных через mosmap
+========================================
+NEEDED_KEYS = [
+    'latitude', 'longitude',
+    'district_name', # название района
+    'price', #
+    'orgs', # количество организаций
+    'zone', # Информация по жилой зоне вокруг точки
+    'bcenters', # Расстояние до ближайших бизнес-центров (в метрах) (нужно агрегировать)
+    'metro_exits', # Выходы метро и координаты до него
+    'traffic1', 'traffic2', 'traffic3', 'traffic4' # 4 типа трафика
+]
+'''
+
 
 def api_call_geocoder_address(address):
     params = {
         'apikey': API_KEY,
         'address': address
     }
-    response = requests.get(URL_GEO, params=params)
+    response = requests.get(URL_GEOCODER, params=params)
     data = response.json()
     return data
+
 
 def api_call_geocoder_coo(lat, lon):
     params = {
@@ -24,9 +44,10 @@ def api_call_geocoder_coo(lat, lon):
         'longitude': lon,
         'latitude': lat,
     }
-    response = requests.get(URL_GEO, params=params)
+    response = requests.get(URL_GEOCODER, params=params)
     data = response.json()
     return data
+
 
 def api_call_analytic(lat, lon, radius):
     params = {
@@ -40,16 +61,6 @@ def api_call_analytic(lat, lon, radius):
     data = response.json()
     return data
 
-needed_keys = [
-    'latitude', 'longitude',
-    'district_name', # название района
-    'price', #
-    'orgs', # количество организаций
-    'zone', # Информация по жилой зоне вокруг точки
-    'bcenters', # Расстояние до ближайших бизнес-центров (в метрах) (нужно агрегировать)
-    'metro_exits', # Выходы метро и координаты до него
-    'traffic1', 'traffic2', 'traffic3', 'traffic4' # 4 типа трафика
-]
 
 @lru_cache(maxsize=2048)
 def get_data_geocoder_coo(lat, lon):
@@ -61,12 +72,14 @@ def get_data_geocoder_coo(lat, lon):
         'near_subway_distance': data['near_subway_distance'],
     }
 
+
 def get_and_check_i_dont_want_to_make_names(d: dict, id):
     if not (type(d) is dict):
         return np.nan
     if id not in d:
         return np.nan
     return d[id]
+
 
 @lru_cache(maxsize=2048)
 def get_data_radius(lat, lon, radius):
@@ -123,14 +136,11 @@ def get_data_radius(lat, lon, radius):
     })
     return pd_dict
 
-async def get_all_data(lat: float, lon: float) -> pd.DataFrame | None:
+
+async def get_mosmap_data(lat: float, lon: float, radius: int) -> pd.DataFrame | None:
     try:
-        df1 = get_data_radius(lat, lon, 300)
-        df2 = get_data_radius(lat, lon, 600)
-        df1 = pd.DataFrame(df1, index=[0])
-        df2 = pd.DataFrame(df2, index=[0])
-        _ = pd.concat([df1, df2.drop(['district_price', 'district_name'], axis=1)], axis=1)
-        return _
+        data_dict = get_data_radius(lat, lon, radius)
+        return pd.DataFrame(data=data_dict, index=[0])
     except BaseException as ex:
         print(ex)
         return None
