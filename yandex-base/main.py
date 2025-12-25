@@ -6,7 +6,7 @@ from schemas import YandexBaseInput, YandexBaseOutput
 app = FastAPI()
 
 
-@app.post("/get_yandex")
+@app.get("/get_yandex")
 async def get_yandex(input_json: YandexBaseInput) -> YandexBaseOutput | None:
     raw_json = input_json.model_dump()
     try:

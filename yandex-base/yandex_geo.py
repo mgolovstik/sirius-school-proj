@@ -41,6 +41,5 @@ def get_dict(lat, lon, radius, rubrics):
                 if x in sub:
                     fl = True
             if fl:
-                lst["_".join(a)] = lst.get("_".join(a), 0) + 1
+                lst["_".join(a) + "_" + str(radius)] = lst.get("_".join(a) + "_" + str(radius), 0) + 1
     return lst
-
