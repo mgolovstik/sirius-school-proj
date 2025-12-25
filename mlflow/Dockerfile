@@ -1,6 +1,6 @@
 FROM python:3.10-bullseye
 
-RUN pip install mlflow==2.1.1
+RUN pip install mlflow==3.8.0
 
 COPY . .
 
