@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from yandex_geo import get_dict
-from schemas import YandexBaseInput, YandexBaseOutput
+from yb.yandex_geo import get_dict
+from yb.schemas import YandexBaseInput, YandexBaseOutput
 
 
 app = FastAPI()

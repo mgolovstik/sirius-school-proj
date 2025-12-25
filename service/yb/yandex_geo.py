@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 EARTH_RADIUS = 6371.009
-DF = pd.read_excel("data/geo_data.xlsx")
+DF = pd.read_excel("yb/data/geo_data.xlsx")
 
 
 def haversin(theta):

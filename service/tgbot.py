@@ -149,7 +149,12 @@ async def cmd_predict(callback_query: CallbackQuery, state: FSMContext):
         await callback_query.message.answer("Не все данные введены корректно. Используйте /req, чтобы проверить их")
         await callback_query.answer("wa")
         return
-    ans = await predict(data)
+    try:
+        ans = await predict(data)
+    except BaseException as ex:
+        print(ex)
+        await callback_query.answer("wa")
+        return
     str_ans = await convert_pred_to_str(ans.model_dump())
     await callback_query.message.answer(str_ans)
     await callback_query.answer("ok")
