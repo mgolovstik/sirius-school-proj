@@ -2,4 +2,6 @@
 .ipynb_checkpoints/
 __pycache__/
 data/data_main/
-catboost_info/
+/analytics/catboost_info
+/data/geocoding_ya
+/data/geocoding_err
