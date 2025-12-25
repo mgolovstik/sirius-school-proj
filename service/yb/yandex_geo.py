@@ -1,45 +1,36 @@
-import pandas as pd
+from sklearn.neighbors import BallTree
 import numpy as np
+import pandas as pd
+from collections import Counter
 
-EARTH_RADIUS = 6371.009
-DF = pd.read_excel("yb/data/geo_data.xlsx")
+data = pd.read_excel("yb/data/geo_data.xlsx")
+data = data.dropna(subset=["lat", "lon", "rubrics"])
+data["rub_list"] = (
+    data["rubrics"]
+        .astype(str)
+        .str.split(";")
+        .apply(lambda x: [s.strip() for s in x if s.strip()])
+)
 
+EARTH_R = 6371000.0
+all_rubrics = Counter(x for lst in data["rub_list"] for x in lst)
+keep_rubrics = {k for k, v in all_rubrics.items() if v >= 100}
 
-def haversin(theta):
-    return (1 - np.cos(theta)) / 2.0
+coords_data = np.radians(data[["lat", "lon"]].values)
+tree = BallTree(coords_data, metric  = "haversine")
 
-
-def haversine_2D_mat(data1, data2):
-    lats1, lons1 = data1['lat'].values, data1['lon'].values
-    phis1, lambs1 = np.radians(lats1).reshape(-1, 1), np.radians(lons1).reshape(-1, 1)
-
-    lats2, lons2 = data2['lat'].values, data2['lon'].values
-    phis2, lambs2 = np.radians(lats2).reshape(-1, 1), np.radians(lons2).reshape(-1, 1)
-
-    deltas_lats = phis1 - phis2.T
-    deltas_lons = lambs1 - lambs2.T
-
-    cos_phis1 = np.cos(phis1)
-    cos_phis2 = np.cos(phis2)
-    a = haversin(deltas_lats) + cos_phis1 * cos_phis2.T * haversin(deltas_lons)
-
-    vec_dist = 2 * EARTH_RADIUS * np.arcsin(np.sqrt(a))
-    return vec_dist * 1000
-
-
-def get_dict(lat, lon, radius, rubrics):
-    point_df = pd.DataFrame({"lat": [lat], "lon": [lon]})
-    ls = haversine_2D_mat(point_df, DF)[0]
-    r = DF.loc[ls <= radius, "rubrics"]
-    rub_split = r.str.split(";").dropna()
-    rub_split = rub_split.apply(lambda x: set(x))
+async def get_lst(lat, lon, R_m):
+    idxs = tree.query_radius(np.radians([[lat, lon]]), r = R_m / EARTH_R)[0]
     lst = {}
-    for sub in rub_split:
-        for a in rubrics:
-            fl = False
-            for x in a:
-                if x in sub:
-                    fl = True
-            if fl:
-                lst["_".join(a) + "_" + str(radius)] = lst.get("_".join(a) + "_" + str(radius), 0) + 1
+    for i in idxs:
+        for r in data.iloc[i]["rub_list"]:
+            if r in keep_rubrics:
+                lst[r] = lst.get(r, 0) + 1
     return lst
+
+async def get_yandex_data(lat, lon, radius, rubrics) -> pd.DataFrame:
+    geo_df = pd.DataFrame([await get_lst(lat, lon, radius)]).fillna(0).astype(int)
+    geo_df.columns = [f"cnt_{c.replace(' ', '_')}" for c in geo_df.columns]
+    geo_df = geo_df.reindex(columns=rubrics, fill_value=0)
+    print(geo_df)
+    return geo_df

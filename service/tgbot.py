@@ -1,3 +1,30 @@
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import TargetEncoder
+class OrdinalByTargetEncoder(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.te = TargetEncoder(target_type="continuous", random_state=10)
+
+    def fit(self, X, y):
+        self.te = self.te.fit(X, y)
+        
+    def transform(self, X, y=None):
+        X_copy = X.copy()
+        for i, col in enumerate(X.columns):
+            cat_dict = dict(zip(self.te.categories_[i], self.te.encodings_[i]))
+            ordinal_categories = sorted(cat_dict, key=cat_dict.get)
+            ordinal_mapping = dict(zip(ordinal_categories, range(len(ordinal_categories))))
+            X_copy[col] = X_copy[col].map(ordinal_mapping)
+            X_copy[col] = X_copy[col].fillna(len(ordinal_categories) // 2)
+        return X_copy
+
+    def fit_transform(self, X, y):
+        self.fit(X, y)
+        return self.transform(X)
+
+    def set_output(self, *, transform=None):
+        """Scikit-learn 1.2+ requirement"""
+        return self
+
 import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
@@ -11,10 +38,7 @@ from pydantic import ValidationError
 from schemas import AdvertInput, AdvertOutput
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-
-assert load_dotenv()
-
-BOT_TOKEN = os.getenv('BOT_TOKEN')
+from var import BOT_TOKEN
 
 # Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
@@ -40,8 +64,8 @@ change_req_buttons = [
 change_req_button_menu = InlineKeyboardMarkup(inline_keyboard=change_req_buttons)
 
 async def convert_data_to_request(data: dict):
-    lat = data.get("lat", 0.0)
-    lon = data.get("lng", 0.0)
+    lat = data.get("lat", 55.621211)
+    lon = data.get("lng", 37.745600)
     square = data.get("square", 0.0)
     metro_dist = data.get("metro_dist", 0.0)
     floor = data.get("floor", 0)
@@ -152,9 +176,8 @@ async def cmd_predict(callback_query: CallbackQuery, state: FSMContext):
     try:
         ans = await predict(data)
     except BaseException as ex:
-        print(ex)
         await callback_query.answer("wa")
-        return
+        raise ex
     str_ans = await convert_pred_to_str(ans.model_dump())
     await callback_query.message.answer(str_ans)
     await callback_query.answer("ok")

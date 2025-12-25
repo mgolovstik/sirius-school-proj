@@ -6,7 +6,7 @@ class YandexBaseInput(BaseModel):
     lat: float = Field(..., example=55.625578)
     lon: float = Field(..., example=37.606392)
     radius: int = Field(..., example=600)
-    rubrics: List[List[str]] = Field(..., example=[["Кафе"]])
+    rubrics: List[str] = Field(..., example=["Кафе"])
 
 
 class YandexBaseOutput(BaseModel):

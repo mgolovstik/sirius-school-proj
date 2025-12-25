@@ -1,19 +1,13 @@
 from fastapi import FastAPI
-from yb.yandex_geo import get_dict
+from yb.yandex_geo import get_yandex_data
 from yb.schemas import YandexBaseInput, YandexBaseOutput
 
-
 app = FastAPI()
-
 
 @app.get("/get_yandex")
 async def get_yandex(input_json: YandexBaseInput) -> YandexBaseOutput | None:
     raw_json = input_json.model_dump()
-    try:
-        data = get_dict(**raw_json)
-        result_dict = {
-            'data': data,
-        }
-        return YandexBaseOutput(**result_dict)
-    except Exception as e:
-        print(f"Failed with exception:\n{str(e)}")
+    data = await get_yandex_data(**raw_json)
+    data = data.to_dict(orient='records')[0]
+    print(data)
+    return YandexBaseOutput(data=data)

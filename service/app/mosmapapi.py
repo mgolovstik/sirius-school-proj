@@ -5,28 +5,7 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from functools import lru_cache
-
-assert load_dotenv()
-
-URL = os.getenv("MOSMAP_GEOCODER_URL")
-URL_GEOCODER = os.getenv("MOSMAP_URL")
-API_KEY = os.getenv("MOSMAP_URL_GEOCODER")
-
-'''
-Модуль получения геоданных через mosmap
-========================================
-NEEDED_KEYS = [
-    'latitude', 'longitude',
-    'district_name', # название района
-    'price', #
-    'orgs', # количество организаций
-    'zone', # Информация по жилой зоне вокруг точки
-    'bcenters', # Расстояние до ближайших бизнес-центров (в метрах) (нужно агрегировать)
-    'metro_exits', # Выходы метро и координаты до него
-    'traffic1', 'traffic2', 'traffic3', 'traffic4' # 4 типа трафика
-]
-'''
-
+from var import API_KEY, URL, URL_GEOCODER
 
 def api_call_geocoder_address(address):
     params = {
@@ -138,9 +117,5 @@ def get_data_radius(lat, lon, radius):
 
 
 async def get_mosmap_data(lat: float, lon: float, radius: int) -> pd.DataFrame | None:
-    try:
-        data_dict = get_data_radius(lat, lon, radius)
-        return pd.DataFrame(data=data_dict, index=[0])
-    except BaseException as ex:
-        print(ex)
-        return None
+    data_dict = get_data_radius(lat, lon, radius)
+    return pd.DataFrame(data=data_dict, index=[0])
