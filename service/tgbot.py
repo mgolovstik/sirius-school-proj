@@ -51,6 +51,7 @@ class Form(StatesGroup):
     lng = State()
     square = State()
     floor = State()
+    chdist = State()
 
 
 change_req_buttons = [
@@ -58,6 +59,7 @@ change_req_buttons = [
     InlineKeyboardButton(text="Изменить долготу (lng)", callback_data="chlng")],
     [InlineKeyboardButton(text="Изменить общую площадь", callback_data="chsquare"),
     InlineKeyboardButton(text="Изменить этаж", callback_data="chfloor")],
+    [InlineKeyboardButton(text="Изменить расстояние до метро", callback_data="chdist")],
     [InlineKeyboardButton(text="Обновить", callback_data="update")],
     [InlineKeyboardButton(text="Предсказать", callback_data="predict")]
 ]
@@ -69,18 +71,14 @@ async def convert_data_to_request(data: dict):
     square = data.get("square", 0.0)
     metro_dist = data.get("metro_dist", 0.0)
     floor = data.get("floor", 0)
-    author_type = data.get("author_type", "Частное лицо")
     object_type = data.get("object_type", "Торговое / Свободного назначения")
-    metro_district = data.get("metro_district", "Неизвестно")
     return {
         'lat': lat,
         'lng': lon,
         'Общая площадь': square,
         'Расстояние до метро, км': metro_dist,
         'Этаж': floor,
-        'Тип автора': author_type,
         'Вид объекта': object_type,
-        'Метро/Район': metro_district
     }
 
 async def convert_data_to_str(data: dict) -> str:
@@ -90,13 +88,11 @@ async def convert_data_to_str(data: dict) -> str:
         "Общая площадь, м^2: " + str(data['Общая площадь'])+'\n'+\
         "Расстояние до метро, км: " + str(data['Расстояние до метро, км'])+'\n'+\
         "Этаж: " + str(data['Этаж'])+'\n'+\
-        "Тип автора: " + str(data['Тип автора'])+'\n'+\
-        "Вид объекта: " + str(data['Вид объекта'])+'\n'+\
-        "Метро/Район: " + str(data['Метро/Район'])
+        "Вид объекта: " + str(data['Вид объекта'])+'\n'
     return str_data
 
 async def convert_pred_to_str(pred: dict):
-    return f"Средняя цена за помещение с такими параметрами: {pred['pred']} руб."
+    return f"Средняя цена за аренду помещения с такими параметрами: {round(pred['pred'], -3)} руб./мес"
 
 @dp.callback_query(F.data == "update")
 async def cmd_chreq(callback_query: CallbackQuery, state: FSMContext):
@@ -110,6 +106,19 @@ async def cmd_chreq(callback_query: CallbackQuery, state: FSMContext):
         reply_markup=change_req_button_menu
     )
 
+@dp.callback_query(F.data == "chdist")
+async def cmd_chdist(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer("Введите расстояние до метро (км)")
+    await state.set_state(Form.chdist)
+@dp.message(Form.chdist)
+async def change_dist(message: types.Message, state: FSMContext):
+    try:
+        await state.update_data(metro_dist=float(message.text))
+        await state.set_state(None)
+    except:
+        await message.answer("Данные введены неверно, попробуйте ещё раз.\n" +\
+                            "Данные должны быть числом")
+
 @dp.callback_query(F.data == "chlat")
 async def cmd_chlat(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer("Введите lat")
@@ -120,7 +129,7 @@ async def change_lat(message: types.Message, state: FSMContext):
         await state.update_data(lat=float(message.text))
         await state.set_state(None)
     except:
-        await message.answer("Данные введены неверно, попробуйте ещё раз. " +\
+        await message.answer("Данные введены неверно, попробуйте ещё раз.\n" +\
                             "Данные должны быть числом")
 
 @dp.callback_query(F.data == "chlng")
@@ -133,7 +142,7 @@ async def change_lon(message: types.Message, state: FSMContext):
         await state.update_data(lng=float(message.text))
         await state.set_state(None)
     except:
-        await message.answer("Данные введены неверно, попробуйте ещё раз. " +\
+        await message.answer("Данные введены неверно, попробуйте ещё раз.\n" +\
                             "Данные должны быть числом")
 
 @dp.callback_query(F.data == "chsquare")
@@ -146,7 +155,7 @@ async def change_square(message: types.Message, state: FSMContext):
         await state.update_data(square=float(message.text))
         await state.set_state(None)
     except:
-        await message.answer("Данные введены неверно, попробуйте ещё раз. " +\
+        await message.answer("Данные введены неверно, попробуйте ещё раз.\n" +\
                             "Данные должны быть числом")
 
 @dp.callback_query(F.data == "chfloor")
@@ -159,7 +168,7 @@ async def change_floor(message: types.Message, state: FSMContext):
         await state.update_data(floor=int(message.text))
         await state.set_state(None)
     except:
-        await message.answer("Данные введены неверно, попробуйте ещё раз. " +\
+        await message.answer("Данные введены неверно, попробуйте ещё раз.\n" +\
                             "Данные должны быть целым числом")
 
 @dp.callback_query(F.data == "predict")
@@ -180,7 +189,7 @@ async def cmd_predict(callback_query: CallbackQuery, state: FSMContext):
         raise ex
     str_ans = await convert_pred_to_str(ans.model_dump())
     await callback_query.message.answer(str_ans)
-    await callback_query.answer("ok")
+    # await callback_query.answer("ok")
 
 @dp.message(Command("req"))
 async def cmd_req(message: types.Message, state: FSMContext):
