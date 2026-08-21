@@ -10,5 +10,5 @@ URL_GEOCODER = os.getenv("MOSMAP_GEOCODER_URL")
 API_KEY = os.getenv("API_KEY")
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
-mlflow_model = mlflow.sklearn.load_model("models:/" + "misha-test-model" + "/3")
+mlflow_model = mlflow.sklearn.load_model("models:/" + "misha-test-model" + "/5")
 data_transformer = joblib.load("transformer.joblib")

@@ -191,6 +191,10 @@ async def cmd_predict(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.message.answer(str_ans)
     # await callback_query.answer("ok")
 
+@dp.message(Command("start"))
+async def start(message: types.Message, state: FSMContext):
+    await message.answer("Бот работает. Введите команду /start")
+
 @dp.message(Command("req"))
 async def cmd_req(message: types.Message, state: FSMContext):
     data = await state.get_data()

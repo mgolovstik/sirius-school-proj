@@ -9,3 +9,5 @@ mlflow==3.8.0
 pydantic
 pydantic-settings
 python-dotenv
+aiogram
+seaborn
