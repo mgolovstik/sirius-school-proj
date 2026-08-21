@@ -11,4 +11,4 @@
 
 ## Презентация
 
-В репозитории доступна итоговая [презентация](https://github.com/mgolovstik/sirius-school-proj/end_to_end_project.pdf).
+В репозитории доступна итоговая [презентация](https://github.com/mgolovstik/sirius-school-proj/blob/main/end_to_end_project.pdf).
